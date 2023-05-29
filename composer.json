@@ -1,0 +1,36 @@
+{
+    "name": "signaturetech/laravel-otp",
+    "type": "library",
+    "description": "A package to generate and manage otp",
+    "keywords": ["otp", "laravel", "mobile", "email"],
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "laravel/framework": ">= 9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SignatureTech\\LaravelOtp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SignatureTech\\LaravelOtp\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Prem Chand Saini",
+            "email": "prem@signaturetech.in"
+        }
+    ],
+    "minimum-stability": "stable",
+    "version": "1.0.0",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SignatureTech\\LaravelOtp\\LaravelOtpServiceProvider"
+            ]
+        }
+    }
+}
