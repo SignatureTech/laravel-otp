@@ -16,7 +16,7 @@
 ## Todo
 
 - [x] Generate OTP
-- [ ] Verify OTP
+- [x] Verify OTP
 - [ ] OTP Lists
 - [ ] Test Cases
 

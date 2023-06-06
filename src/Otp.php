@@ -4,6 +4,7 @@ namespace SignatureTech\LaravelOtp;
 
 use Illuminate\Support\Str;
 use SignatureTech\LaravelOtp\Models\Otp as OtpModel;
+use SignatureTech\LaravelOtp\Exceptions\OtpInvalidException;
 
 class Otp
 {
@@ -113,13 +114,16 @@ class Otp
 
         $model = new OtpModel([
             'receiver' => $this->receiver,
-            'otp' => $this->otp,
+            'otp' => $this->generateOtp(),
             'expired_at' => now()->addMinutes($this->expiry)
         ]);
 
         return $model;
     }
 
+    /**
+     * @return mixed
+     */
     protected function generateOtp()
     {
         switch ($this->format) {
@@ -130,9 +134,24 @@ class Otp
             case "alphanumeric":
                 $this->otp = strtoupper(Str::random($this->length));
                 break;
-            case "numeric":
+            default:
                 $this->otp = mt_rand(pow(10, ($this->length - 1)), pow(10, $this->length) - 1);
-                break;
         }
+
+        return $this->otp;
+    }
+
+    /**
+     * @return OtpModel
+     */
+    public function getOtp()
+    {
+        $otp = OtpModel::query()->where('receiver', $this->receiver)->first();
+
+        if (empty($otp)) {
+            throw new OtpInvalidException(__('Invalid Otp'));
+        }
+
+        return $otp;
     }
 }
