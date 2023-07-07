@@ -146,7 +146,10 @@ class Otp
      */
     public function getOtp()
     {
-        $otp = OtpModel::query()->where('receiver', $this->receiver)->first();
+        $otp = OtpModel::query()
+            ->where('receiver', $this->receiver)
+            ->whereNull('used_at')
+            ->first();
 
         if (empty($otp)) {
             throw new OtpInvalidException(__('Invalid Otp'));

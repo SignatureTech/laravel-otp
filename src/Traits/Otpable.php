@@ -45,6 +45,9 @@ trait Otpable
             throw new OtpInvalidException(__('Invalid Otp'));
         }
 
+        $otpModel->used_at = now();
+        $otpModel->save();
+
         return true;
     }
 }
