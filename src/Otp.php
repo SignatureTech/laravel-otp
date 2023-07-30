@@ -110,11 +110,22 @@ class Otp
      */
     public function generate()
     {
+        // check exiting otp
+        $otp = OtpModel::query()
+            ->where('receiver', $this->receiver)
+            ->where('expired_at', '<=', now())
+            ->whereNull('used_at')
+            ->first();
+
+        if ($otp) {
+            return $otp;
+        }
+
         $this->generateOtp();
 
         $model = new OtpModel([
             'receiver' => $this->receiver,
-            'otp' => $this->generateOtp(),
+            'otp' => app()->environment() == 'local' ? config('otp.default_otp') : $this->generateOtp(),
             'expired_at' => now()->addMinutes($this->expiry)
         ]);
 
