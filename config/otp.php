@@ -62,6 +62,6 @@ return [
     | APP_ENV=local
     |
     */
-    'deafault_otp' => env('DEFAULT_OTP', 987654),
+    'default_otp' => env('DEFAULT_OTP', 987654),
 
 ];

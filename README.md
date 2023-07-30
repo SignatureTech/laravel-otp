@@ -25,7 +25,7 @@
 - Generate OTP
 - Verify OTP
 - Get the User OTP List
-- Generate custom digit, type OTP
+- Generate custom lenth, expiry and formate OTP
 
 ## Installation & Configuration
 
