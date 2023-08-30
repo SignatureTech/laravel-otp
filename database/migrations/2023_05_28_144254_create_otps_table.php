@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('opts');
+        Schema::dropIfExists(config('otp.table', 'otps'));
     }
 };

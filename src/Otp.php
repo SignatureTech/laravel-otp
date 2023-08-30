@@ -51,7 +51,7 @@ class Otp
 
     /**
      * @param mixed $receiver
-     * 
+     *
      * @return self
      */
     public static function for($receiver): self
@@ -61,7 +61,7 @@ class Otp
 
     /**
      * @param mixed $expiry
-     * 
+     *
      * @return self
      */
     public function setExpiry($expiry): self
@@ -77,7 +77,7 @@ class Otp
 
     /**
      * @param mixed $length
-     * 
+     *
      * @return self
      */
     public function setLength($length): self
@@ -93,7 +93,7 @@ class Otp
 
     /**
      * @param mixed $format
-     * 
+     *
      * @return self
      */
     public function setFormat($format): self
@@ -113,7 +113,7 @@ class Otp
         // check exiting otp
         $otp = OtpModel::query()
             ->where('receiver', $this->receiver)
-            ->where('expired_at', '<=', now())
+            ->where('expired_at', '>=', now())
             ->whereNull('used_at')
             ->first();
 
@@ -139,8 +139,8 @@ class Otp
     {
         switch ($this->format) {
             case "alpha":
-                $alph = "QWERTYUIOPASDFGHJKLZXCVBNMABCDEFGHIJKLMNOPQRSTUVWXYZMNBVCXZASDFGHJKLPOIUYTREWQ";
-                $this->otp = substr(str_shuffle($alph), 0, $this->length);
+                $alpha = "QWERTYUIOPASDFGHJKLZXCVBNMABCDEFGHIJKLMNOPQRSTUVWXYZMNBVCXZASDFGHJKLPOIUYTREWQ";
+                $this->otp = substr(str_shuffle($alpha), 0, $this->length);
                 break;
             case "alphanumeric":
                 $this->otp = strtoupper(Str::random($this->length));
@@ -160,6 +160,7 @@ class Otp
         $otp = OtpModel::query()
             ->where('receiver', $this->receiver)
             ->whereNull('used_at')
+            ->latest()
             ->first();
 
         if (empty($otp)) {

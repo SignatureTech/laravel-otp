@@ -21,18 +21,18 @@ trait Otpable
 
     /**
      * @param mixed $otp
-     * 
+     *
      * @return Otp
      */
     public function createOtp($otp)
     {
-        return $this->otps()->save($otp);
+        return isset($otp->id) ? $otp : $this->otps()->save($otp);
     }
 
     /**
      * @param mixed $otpModel
      * @param mixed $otp
-     * 
+     *
      * @return boolean
      */
     public function verifyOtp($otpModel, $otp)
