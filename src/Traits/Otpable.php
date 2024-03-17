@@ -37,7 +37,7 @@ trait Otpable
      */
     public function verifyOtp($otpModel, $otp)
     {
-        if (now()->gt($this->expired_at)) {
+        if (now()->gt($otpModel->expired_at)) {
             throw new OtpExpiredException(__('Otp Expired'));
         }
 
