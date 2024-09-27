@@ -17,7 +17,8 @@
 
 - [x] Generate OTP
 - [x] Verify OTP
-- [x] OTP Lists
+- [x] Methods
+- [ ] OTP Lists
 - [ ] Test Cases
 
 ## Features
@@ -33,6 +34,12 @@ You can install this package via composer using:
 
 ```
 composer require signaturetech/laravel-otp
+```
+
+Next run the command below to setup api-response.config file, you can set your configuration.
+
+```
+php artisan vendor:publish --tag=otp-config
 ```
 
 Now add the `use SignatureTech\LaravelOtp\Traits\Otpable` trait to your model.
@@ -58,7 +65,7 @@ use App\Models\User;
 $user = User::first();
 ```
 
-2. Create Otp Insatance
+2. Create Otp Instance
 
 ```
 use SignatureTech\LaravelOtp\Otp;
@@ -81,7 +88,7 @@ $otp = $user->otp;
 
 ### Verify OTP
 
-You can verifu otp by useing below code:
+You can verify otp by using below code:
 
 1. Get the use details
 
@@ -91,7 +98,7 @@ use App\Models\User;
 $user = User::first();
 ```
 
-2. Get Otp Insatance
+2. Get Otp Instance
 
 ```
 use SignatureTech\LaravelOtp\Otp;
@@ -111,6 +118,70 @@ try {
     return $e->getMessage;
 }
 ```
+
+### Create OTP without model
+
+You can also create otp without model using the following:
+
+1. Create OTP
+
+```
+use SignatureTech\LaravelOtp\Otp;
+
+
+$otp = Otp::for($user->email)->create();
+```
+
+**Note:** You can use email/mobile/phone number to generate otp Just pass the detail using `for` method.
+
+**Note:** You can use more method to setting otp all methods described in `methods` section.
+
+2. Verify Otp
+
+```
+try {
+    $otp->verifyOtp($request->get('otp'));
+} catch (OtpInvalidException $e) {
+    return $e->getMessage;
+} catch (OtpExpiredException $e) {
+    return $e->getMessage;
+}
+```
+
+## Methods
+
+1. Set length of otp
+
+```
+use SignatureTech\LaravelOtp\Otp;
+
+// Set Length of OTP
+$otp = Otp::for($user->email)->setLength(4)->generate();
+```
+
+**Note:** Default length is 6 digit and you can change the default digit to add the `OTP_LENGTH=4` in `.env` or `config/otp.php` file
+
+2. Set Format (Available Format: alpha | alphanumeric | numeric)
+
+```
+use SignatureTech\LaravelOtp\Otp;
+
+// Set Format (Available Format: alpha | alphanumeric | numeric)
+$otp = Otp::for($user->email)->setFormat('numeric')->generate();
+```
+
+**Note:** Default format is numeric and you can change the default format to add the `OTP_FORMAT=4` in `.env` or `config/otp.php` file
+
+2. Set Expiry (In minutes)
+
+```
+use SignatureTech\LaravelOtp\Otp;
+
+// Set Format (Available Format: alpha | alphanumeric | numeric)
+$otp = Otp::for($user->email)->setExpiry(20)->generate();
+```
+
+**Note:** Default expiry is 10 minutes and you can change this to add the `OTP_EXPIRY=20` in `.env` or `config/otp.php` file
 
 ## License
 

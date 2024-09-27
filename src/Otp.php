@@ -106,25 +106,34 @@ class Otp
     }
 
     /**
-     * @return OtpModel
+     *
+     * @return OtpModel|null
      */
-    public function generate()
+    public function checkOtp(): OtpModel|null
     {
-        // check exiting otp
-        $otp = OtpModel::query()
+        return OtpModel::query()
             ->where('receiver', $this->receiver)
             ->where('expired_at', '>=', now())
             ->whereNull('used_at')
             ->first();
+    }
+
+    /**
+     * @param string|null $event
+     * @return OtpModel
+     */
+    public function generate(string|null $event = null): OtpModel
+    {
+        // check exiting otp
+        $otp = $this->checkOtp();
 
         if ($otp) {
             return $otp;
         }
 
-        $this->generateOtp();
-
         $model = new OtpModel([
             'receiver' => $this->receiver,
+            'event' => $event,
             'otp' => app()->environment() == 'local' ? config('otp.default_otp') : $this->generateOtp(),
             'expired_at' => now()->addMinutes($this->expiry)
         ]);
@@ -133,9 +142,31 @@ class Otp
     }
 
     /**
+     * @param string|null $event
+     * @return OtpModel
+     */
+    public function create(string|null $event = null): OtpModel
+    {
+        $otp = $this->checkOtp();
+
+        if ($otp) {
+            return $otp;
+        }
+
+        $otp = OtpModel::create([
+            'receiver' => $this->receiver,
+            'event' => $event,
+            'otp' => app()->environment() == 'local' ? config('otp.default_otp') : $this->generateOtp(),
+            'expired_at' => now()->addMinutes($this->expiry)
+        ]);
+
+        return $otp;
+    }
+
+    /**
      * @return mixed
      */
-    protected function generateOtp()
+    protected function generateOtp(): mixed
     {
         switch ($this->format) {
             case "alpha":
@@ -155,7 +186,7 @@ class Otp
     /**
      * @return OtpModel
      */
-    public function getOtp()
+    public function getOtp(): OtpModel
     {
         $otp = OtpModel::query()
             ->where('receiver', $this->receiver)
