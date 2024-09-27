@@ -2,7 +2,12 @@
     "name": "signaturetech/laravel-otp",
     "type": "library",
     "description": "A package to generate and manage otp",
-    "keywords": ["otp", "laravel", "mobile", "email"],
+    "keywords": [
+        "otp",
+        "laravel",
+        "mobile",
+        "email"
+    ],
     "license": "MIT",
     "require": {
         "php": ">=8.0",
@@ -25,7 +30,7 @@
         }
     ],
     "minimum-stability": "stable",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "extra": {
         "laravel": {
             "providers": [
