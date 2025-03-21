@@ -3,6 +3,9 @@
 
 ---
 
+![GitHub](https://img.shields.io/github/license/signaturetech/laravel-otp)
+![Packagist Downloads](https://img.shields.io/packagist/dt/signaturetech/laravel-otp)
+
 ## Table of contents
 
 - [Introduction](#introduction)

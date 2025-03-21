@@ -6,7 +6,8 @@
         "otp",
         "laravel",
         "mobile",
-        "email"
+        "email",
+        "laravel-otp"
     ],
     "license": "MIT",
     "require": {
@@ -30,7 +31,7 @@
         }
     ],
     "minimum-stability": "stable",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "extra": {
         "laravel": {
             "providers": [
