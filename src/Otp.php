@@ -91,6 +91,18 @@ class Otp
         return $this;
     }
 
+     /**
+     * @param string|null $otp
+     *
+     * @return self
+     */
+    public function setDefault(string|null $otp = null): self
+    {
+        $this->otp = $otp ?? config('otp.default_otp');
+
+        return $this;
+    }
+
     /**
      * @param mixed $format
      *
