@@ -6,122 +6,126 @@ use Illuminate\Support\Str;
 use SignatureTech\LaravelOtp\Models\Otp as OtpModel;
 use SignatureTech\LaravelOtp\Exceptions\OtpInvalidException;
 
+/**
+ * Class Otp
+ * Handles OTP generation, validation, and management.
+ */
 class Otp
 {
     /**
-     * @var int
+     * OTP length.
      */
     protected int $length;
 
     /**
-     * @var int
+     * OTP expiry time in minutes.
      */
     protected int $expiry;
 
     /**
-     * @var string
+     * OTP format (alpha, alphanumeric, numeric).
      */
     protected string $format;
 
     /**
-     * @var string
+     * Receiver identifier (e.g., email or phone number).
      */
     protected string $receiver;
 
     /**
-     * @var mixed
+     * Manually set OTP value (optional).
      */
     protected mixed $otp;
 
     /**
-     * @var array
+     * Available OTP formats.
      */
     protected array $availableFormats = ["alpha", "alphanumeric", "numeric"];
 
     /**
-     * @param mixed $receiver
+     * Otp constructor.
+     *
+     * @param mixed $receiver The receiver identifier.
      */
     public function __construct(mixed $receiver)
     {
         $this->receiver = $receiver;
-        $this->length = config('otp.length');
-        $this->expiry = config('otp.expiry');
-        $this->format = config('otp.format');
+        $this->length = config('otp.length', 6);
+        $this->expiry = config('otp.expiry', 5);
+        $this->format = config('otp.format', 'numeric');
     }
 
     /**
-     * @param mixed $receiver
+     * Creates an instance for the given receiver.
      *
-     * @return self
+     * @param mixed $receiver The receiver identifier.
+     * @return self New Otp instance.
      */
-    public static function for($receiver): self
+    public static function for(mixed $receiver): self
     {
-        return new static($receiver);
+        return new self($receiver);
     }
 
     /**
-     * @param mixed $expiry
+     * Sets the OTP expiry time.
      *
-     * @return self
+     * @param int $expiry Expiry time in minutes.
+     * @return self Current instance.
      */
-    public function setExpiry($expiry): self
+    public function setExpiry(int $expiry): self
     {
-        $expiry = (int) $expiry;
-
         if ($expiry > 0) {
             $this->expiry = $expiry;
         }
-
         return $this;
     }
 
     /**
-     * @param mixed $length
+     * Sets the OTP length.
      *
-     * @return self
+     * @param int $length Length of the OTP.
+     * @return self Current instance.
      */
-    public function setLength($length): self
+    public function setLength(int $length): self
     {
-        $length = (int) $length;
-
         if ($length > 0) {
             $this->length = $length;
         }
-
         return $this;
     }
 
-     /**
-     * @param string|null $otp
+    /**
+     * Sets a default OTP value.
      *
-     * @return self
+     * @param string|null $otp Custom OTP value.
+     * @return self Current instance.
      */
-    public function setDefault(string|null $otp = null): self
+    public function setDefault(?string $otp = null): self
     {
         $this->otp = $otp ?? config('otp.default_otp');
-
         return $this;
     }
 
     /**
-     * @param mixed $format
+     * Sets the OTP format.
      *
-     * @return self
+     * @param string $format OTP format (alpha, alphanumeric, numeric).
+     * @return self Current instance.
      */
-    public function setFormat($format): self
+    public function setFormat(string $format): self
     {
-        if (in_array($format, $this->availableFormats)) {
+        if (in_array($format, $this->availableFormats, true)) {
             $this->format = $format;
         }
-
         return $this;
     }
 
     /**
+     * Checks if a valid OTP exists for the receiver.
      *
-     * @return OtpModel|null
+     * @return OtpModel|null Existing OTP model if found, otherwise null.
      */
-    public function checkOtp(): OtpModel|null
+    public function checkOtp(): ?OtpModel
     {
         return OtpModel::query()
             ->where('receiver', $this->receiver)
@@ -131,72 +135,74 @@ class Otp
     }
 
     /**
-     * @param string|null $event
-     * @return OtpModel
+     * Generates and saves a new OTP for the receiver.
+     * If an active OTP exists, it returns the existing OTP.
+     *
+     * @param string|null $event Event identifier (optional).
+     * @return OtpModel OTP model instance.
      */
-    public function generate(string|null $event = null): OtpModel
+    public function create(?string $event = null): OtpModel
     {
-        // check exiting otp
-        $otp = $this->checkOtp();
-
-        if ($otp) {
+        if ($otp = $this->checkOtp()) {
             return $otp;
         }
 
-        $model = new OtpModel([
+        return OtpModel::create([
             'receiver' => $this->receiver,
             'event' => $event,
-            'otp' => app()->environment() == 'local' ? config('otp.default_otp') : $this->generateOtp(),
-            'expired_at' => now()->addMinutes($this->expiry)
+            'otp' => $this->generateOtp(),
+            'expired_at' => now()->addMinutes($this->expiry),
         ]);
-
-        return $model;
     }
 
     /**
-     * @param string|null $event
-     * @return OtpModel
+     * Generates and saves a new OTP for the receiver.
+     * If an active OTP exists, it returns the existing OTP.
+     *
+     * @param string|null $event Event identifier (optional).
+     * @return OtpModel OTP model instance.
      */
-    public function create(string|null $event = null): OtpModel
+    public function generate(?string $event = null): OtpModel
     {
-        $otp = $this->checkOtp();
-
-        if ($otp) {
+        if ($otp = $this->checkOtp()) {
             return $otp;
         }
 
-        $otp = OtpModel::create([
+        return new OtpModel([
             'receiver' => $this->receiver,
             'event' => $event,
-            'otp' => app()->environment() == 'local' ? config('otp.default_otp') : $this->generateOtp(),
-            'expired_at' => now()->addMinutes($this->expiry)
+            'otp' => $this->generateOtp(),
+            'expired_at' => now()->addMinutes($this->expiry),
         ]);
-
-        return $otp;
     }
 
     /**
-     * @return mixed
+     * Generates an OTP based on the selected format.
+     *
+     * @return mixed Generated OTP.
      */
     protected function generateOtp(): mixed
     {
-        switch ($this->format) {
-            case "alpha":
-                $alpha = "QWERTYUIOPASDFGHJKLZXCVBNMABCDEFGHIJKLMNOPQRSTUVWXYZMNBVCXZASDFGHJKLPOIUYTREWQ";
-                $this->otp = substr(str_shuffle($alpha), 0, $this->length);
-                break;
-            case "alphanumeric":
-                $this->otp = strtoupper(Str::random($this->length));
-                break;
-            default:
-                $this->otp = mt_rand(pow(10, ($this->length - 1)), pow(10, $this->length) - 1);
+        if ($this->otp) {
+            return $this->otp;
         }
 
-        return $this->otp;
+        if (app()->environment() === 'local') {
+            return config('otp.default_otp', '123456');
+        }
+
+        return match ($this->format) {
+            'alpha' => substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $this->length),
+            'alphanumeric' => Str::upper(Str::random($this->length)),
+            default => random_int(pow(10, $this->length - 1), pow(10, $this->length) - 1),
+        };
     }
 
     /**
-     * @return OtpModel
+     * Retrieves the latest unused OTP for the receiver.
+     *
+     * @throws OtpInvalidException If no valid OTP is found.
+     * @return OtpModel OTP model instance.
      */
     public function getOtp(): OtpModel
     {
@@ -206,8 +212,8 @@ class Otp
             ->latest()
             ->first();
 
-        if (empty($otp)) {
-            throw new OtpInvalidException(__('Invalid Otp'));
+        if (!$otp) {
+            throw new OtpInvalidException(__('Invalid OTP'));
         }
 
         return $otp;

@@ -3,10 +3,14 @@
 namespace SignatureTech\LaravelOtp\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use SignatureTech\LaravelOtp\Exceptions\OtpExpiredException;
 use SignatureTech\LaravelOtp\Exceptions\OtpInvalidException;
+use Carbon\Carbon;
 
+/**
+ * Class Otp
+ * Represents an OTP model with verification capabilities.
+ */
 class Otp extends Model
 {
     /**
@@ -21,29 +25,38 @@ class Otp extends Model
         'otp',
         'expired_at',
         'used_at',
-        'event'
+        'event',
     ];
 
     /**
-     * @return [type]
+     * Get the OTP value.
+     *
+     * @return string OTP string.
      */
-    public function getOtp()
+    public function getOtp(): string
     {
         return $this->otp;
     }
 
-    public function verifyOtp($otp)
+    /**
+     * Verify the provided OTP.
+     *
+     * @param string $otp The OTP to verify.
+     * @throws OtpExpiredException If the OTP is expired.
+     * @throws OtpInvalidException If the OTP is invalid.
+     * @return bool True if the OTP is valid.
+     */
+    public function verifyOtp(string $otp): bool
     {
-        if (now()->gt($this->expired_at)) {
-            throw new OtpExpiredException(__('Otp Expired'));
+        if (Carbon::now()->greaterThan($this->expired_at)) {
+            throw new OtpExpiredException(__('OTP Expired'));
         }
 
-        if ($this->otp != $otp) {
-            throw new OtpInvalidException(__('Invalid Otp'));
+        if ($this->otp !== $otp) {
+            throw new OtpInvalidException(__('Invalid OTP'));
         }
 
-        $this->used_at = now();
-        $this->save();
+        $this->update(['used_at' => Carbon::now()]);
 
         return true;
     }
