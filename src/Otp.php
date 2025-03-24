@@ -35,7 +35,7 @@ class Otp
     /**
      * Manually set OTP value (optional).
      */
-    protected mixed $otp;
+    protected mixed $otp = null;
 
     /**
      * Available OTP formats.
