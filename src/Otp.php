@@ -187,7 +187,7 @@ class Otp
             return $this->otp;
         }
 
-        if (app()->environment() === 'local') {
+        if (app()->environment() !== 'production') {
             return config('otp.default_otp', '123456');
         }
 
